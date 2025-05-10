@@ -19,13 +19,5 @@
 - **Real-Time Chat**: Socket.io
 - **Mood Detection**: Custom algorithms for mood-based UI adaptation
 
-## Setup Instructions
 
-### Prerequisites:
-- Node.js
-- MongoDB
 
-### Installation:
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/aventis.git
