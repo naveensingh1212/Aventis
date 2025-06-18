@@ -1,10 +1,11 @@
 {
+  "type": "module",
   "name": "backend",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-  "start": "server.js",
-  "dev": "nodemon server.js"
+  "start": "node index.js",
+  "dev": "nodemon index.js"
 },
   "keywords": [],
   "author": "",
