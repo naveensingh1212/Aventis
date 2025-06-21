@@ -1,0 +1,47 @@
+/* src/index.css */
+
+/* Import Google Fonts - Inter is a good, modern choice */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+/* Ensure font-serif is defined if you use it for the scroll effect */
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap'); /* Example serif font for scroll */
+
+
+/* CRITICAL: These Tailwind directives MUST be present and at the top after imports */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Global Styles */
+body {
+  font-family: 'Inter', sans-serif; /* Use the font imported above */
+  /* Apply dark mode background and text colors from Tailwind's config */
+  @apply bg-dark-bg text-dark-text-light;
+  scroll-behavior: smooth; /* Smooth scroll for anchor links */
+}
+
+/* Ensure font-serif class is recognized if used */
+.font-serif {
+  font-family: 'Merriweather', serif; /* Or any other serif font you prefer */
+}
+
+/* Base styles for headings (optional, Tailwind usually covers this with classes) */
+h1, h2, h3, h4, h5, h6 {
+  @apply text-dark-text-light; /* Ensure headings are visible on dark background */
+}
+
+/* General link styling */
+a {
+  @apply text-accent-primary hover:text-accent-secondary;
+}
+
+/* Custom animation for Navbar button gradient */
+/* This is defined here because @keyframes cannot be directly in tailwind.config.js */
+/* The 'animate-gradient-xy' class will use this keyframe */
+@keyframes gradient-xy {
+  0%, 100% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+}
