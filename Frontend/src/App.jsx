@@ -1,6 +1,8 @@
 // src/App.jsx
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+
 
 // Import your page components
 import LandingPage from './pages/LandingPage';
@@ -10,13 +12,15 @@ import UserHomePage from './pages/UserHomePage'; // Import the new User Home Pag
 import StarsBackground from './components/StarsBackground'; // Import the StarsBackground component
 
 function App() {
+  const location = useLocation();
+
   return (
     <>
       {/* StarsBackground will cover the entire screen behind content */}
       {/* CRITICAL: Place it here, outside of Routes, to act as a global background */}
       <StarsBackground />
 
-      <Routes>
+      <Routes  key={location.pathname}>
         {/* Route for your Landing Page */}
         <Route path="/" element={<LandingPage />} />
 
