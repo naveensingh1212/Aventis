@@ -20,11 +20,15 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        '/api/v1/auth/signup',
-        { username, fullname, email, password },
-        { withCredentials: true }
-      );
+      const res = await axios.post('/api/v1/auth/register', {
+  username,
+  fullname,
+  email,
+  password,
+}, {
+  withCredentials: true
+});
+
       console.log('Signup successful:', res.data.message || res.data);
       navigate('/login');
     } catch (err) {

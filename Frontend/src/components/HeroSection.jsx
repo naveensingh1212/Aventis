@@ -44,7 +44,7 @@ function HeroSection() {
       {/* Call to action buttons */}
       <div className="mt-12 flex space-x-4 z-10">
         <Link
-          to="/signup"
+          to="/dashboard"
           className="px-8 py-3 rounded-lg bg-gradient-to-r from-accent-gradient-start to-accent-gradient-end text-white font-semibold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
         >
           Get Started Free

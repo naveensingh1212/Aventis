@@ -6,7 +6,7 @@ import axios from 'axios';
 import Spinner from '../components/Spinner';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState(''); // can be username or email
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,7 +20,11 @@ export default function Login() {
     try {
       const res = await axios.post(
         '/api/v1/auth/login',
-        { email, password },
+        {
+          username: identifier,
+          email: identifier,
+          password
+        },
         { withCredentials: true }
       );
       console.log('Login successful:', res.data.message || res.data);
@@ -53,10 +57,10 @@ export default function Login() {
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              placeholder="Username or Email"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
               required
               className="w-full p-3 pl-10 rounded-lg bg-black/60 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
             />

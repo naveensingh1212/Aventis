@@ -3,9 +3,17 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes.js";
 import taskRoutes from "./routes/task.routes.js"; // Import task routes
-
+import cors from "cors";
 dotenv.config();
 const app = express();
+
+
+
+app.use(cors({
+  origin: "http://localhost:5173", // frontend URL
+  credentials: true
+}));
+
 
 // middleware
 app.use(express.json());       // To parse JSON request bodies

@@ -8,7 +8,7 @@ import { useLocation } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';   // Placeholder
 import SignupPage from './pages/SignupPage'; // Placeholder
-import UserHomePage from './pages/UserHomePage'; // Import the new User Home Page component
+import UserHomePage from './pages/dashboard/UserHomePage'; // Import the new User Home Page component
 import StarsBackground from './components/StarsBackground'; // Import the StarsBackground component
 
 function App() {
