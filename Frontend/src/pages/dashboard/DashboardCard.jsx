@@ -1,66 +1,86 @@
-// src/pages/dashboard/UserHomePage.jsx
-import React, { useState } from 'react';
-import { motion } from 'framer-motion'; // Ensure motion is imported for cards
-import {
-  Home, ListTodo, Code, Trophy, Calendar, Users, BookOpen, Gamepad, // Existing sidebar icons
-  Clock, ArrowRight, ExternalLink // Icons needed for cards
-} from 'lucide-react';
+// src/pages/dashboard/DashboardCard.jsx
+import React from 'react';
+import { motion } from 'framer-motion';
+// Removed: import { LucideIcon } from 'lucide-react'; // This import is causing the error
 
-// Import DashboardHeader (already done)
-import DashboardHeader from './DashboardHeader';
-// Import DashboardCard (make sure this is here)
-import DashboardCard from './DashboardCard';
+// Note: TypeScript interface commented out for .jsx compatibility.
+// If you are using TypeScript (.tsx), you can uncomment this interface.
+/*
+interface DashboardCardProps {
+  title: string;
+  icon: React.ReactElement<any, any>; // Changed type to 'any' or more general ReactNode for JSX
+  children: React.ReactNode;
+  className?: string;
+  gradient?: string; // Optional custom gradient for the card background
+}
+*/
 
-const DashboardCard = ({ title, icon, className, children }) => {
+const DashboardCard = ({
+  title,
+  icon,
+  children,
+  className = "",
+  gradient = "from-slate-800/50 to-slate-700/30", // Default gradient if none provided
+  // Add initial, whileInView, viewport, transition props from Framer Motion
+  initial = "hidden",
+  whileInView = "show",
+  viewport = { once: true, amount: 0.3 }, // Default to animate when 30% in view, only once
+  transition = { duration: 0.5, ease: "easeOut" }
+}) => {
+  // Define card animation variants
+  const cardVariants = {
+    hidden: { opacity: 0, y: 30, scale: 0.98 }, // Increased y for a bit more "rise" effect
+    show: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.7, // Slightly longer duration for a smoother reveal
+        ease: "easeOut",
+        // Add a slight delay for staggered appearance if used in a grid parent with staggerChildren
+      }
+    }
+  };
+
   return (
     <motion.div
-      className={`bg-dark-card p-6 rounded-xl shadow-lg border border-dark-border flex flex-col justify-between min-h-[160px] ${className || ''}`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      variants={cardVariants}
+      initial={initial}
+      whileInView={whileInView}
+      viewport={viewport}
+      transition={transition} // Apply the transition prop here
+      whileHover={{
+        scale: 1.02, // Subtle lift on hover
+        transition: { duration: 0.2, ease: "easeOut" }
+      }}
+      className={`
+        bg-gradient-to-br ${gradient} backdrop-blur-xl
+        border border-slate-700/50 rounded-2xl p-6
+        hover:border-slate-600/50 transition-all duration-300
+        shadow-lg hover:shadow-xl group
+        flex flex-col /* Make it a flex column to push content and footer/button */
+        ${className}
+      `}
     >
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-dark-text-light">{title}</h3>
-        {icon && <span className="text-accent-primary">{icon}</span>}
+        <h3 className="text-xl font-semibold text-slate-200 group-hover:text-white transition-colors">
+          {title}
+        </h3>
+        <div className="p-2 rounded-xl bg-slate-700/30 group-hover:bg-slate-600/50 transition-colors">
+          {/* Ensure the icon is properly rendered and receives hover styles */}
+          {React.cloneElement(icon, {
+            size: 20,
+            className: "text-slate-400 group-hover:text-slate-200 transition-colors"
+          })}
+        </div>
       </div>
-      {children} {/* This is where the specific content for each card will go */}
+
+      {/* This div will hold the main content of the card and manage its height */}
+      <div className="flex-grow h-full"> {/* flex-grow to make content area expand */}
+        {children}
+      </div>
     </motion.div>
   );
 };
 
-
-{/* Dashboard Cards Grid */}
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-  {/* Problem of the Day Card */}
-  <DashboardCard title="Problem of the Day" icon={<Code size={20} />}>
-    {/* LeetCode Problem */}
-    <div className="mb-3">
-      <h4 className="text-md font-semibold text-white">LeetCode: Two Sum Array</h4>
-      <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full mt-1 inline-block">Easy</span>
-    </div>
-
-    {/* GeeksforGeeks Problem */}
-    <div className="mb-3">
-      <h4 className="text-md font-semibold text-white">GFG: Longest Common Subsequence</h4>
-      <span className="bg-yellow-600 text-white text-xs px-2 py-0.5 rounded-full mt-1 inline-block">Medium</span>
-    </div>
-
-    {/* CodeChef/Codeforces Problem */}
-    <div className="mb-4">
-      <h4 className="text-md font-semibold text-white">Codeforces: Beautiful Matrix</h4>
-      <span className="bg-red-600 text-white text-xs px-2 py-0.5 rounded-full mt-1 inline-block">Hard</span>
-    </div>
-
-    {/* View All Problems Button */}
-    <a
-      href="/problems" // Link to your dedicated problems page
-      className="flex items-center justify-center space-x-2 bg-dark-bg text-accent-primary py-2.5 rounded-lg border border-accent-primary hover:bg-accent-primary hover:text-white transition-colors duration-200"
-    >
-      <span>View All Problems</span> <ArrowRight size={18} />
-    </a>
-  </DashboardCard>
-
-  {/* Other cards will go here later */}
-
-</div>
 export default DashboardCard;
