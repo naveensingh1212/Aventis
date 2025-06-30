@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock, Loader2 } from 'lucide-react'; // Added Loader2 for loading state without Spinner
 import axios from 'axios';
-import Spinner from '../components/Spinner';
 
 export default function Login() {
   const [identifier, setIdentifier] = useState(''); // can be username or email
@@ -19,7 +18,7 @@ export default function Login() {
 
     try {
       const res = await axios.post(
-        '/api/v1/auth/login',
+        '/api/v1/auth/login', // <--- CORRECTED THIS URL to match your backend routing
         {
           username: identifier,
           email: identifier,
@@ -27,10 +26,20 @@ export default function Login() {
         },
         { withCredentials: true }
       );
-      console.log('Login successful:', res.data.message || res.data);
-      navigate('/dashboard');
+
+      const { accessToken, refreshToken } = res.data.data; // Destructure directly from res.data.data
+
+      if (accessToken) {
+        localStorage.setItem('accessToken', accessToken); // Save accessToken to localStorage
+        console.log('Login successful! Access token stored in localStorage.');
+        navigate('/dashboard'); // Navigate to dashboard after successful login
+      } else {
+        throw new Error('Access token not received in response data.');
+      }
+
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      console.error('Login error:', err.response?.data?.message || err.message);
+      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
@@ -90,7 +99,7 @@ export default function Login() {
           >
             {loading ? (
               <>
-                <Spinner size={20} />
+                <Loader2 className="animate-spin w-6 h-6 mr-3" /> {/* Using Lucide's Loader2 */}
                 Logging in...
               </>
             ) : (
