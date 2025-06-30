@@ -3,10 +3,10 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes.js";
 import taskRoutes from "./routes/task.routes.js"; // Import task routes
+import codingRoutes from "./routes/coding.routes.js"; 
 import cors from "cors";
 dotenv.config();
 const app = express();
-
 
 
 app.use(cors({
@@ -22,7 +22,8 @@ app.use(cookieParser());       // To parse cookies
 
 // routes
 app.use("/api/v1/auth", authRoutes); // Auth routes
-app.use("/api/v1/tasks", taskRoutes); // Task routes // <<< ADDED THIS LINE
+app.use("/api/v1/tasks", taskRoutes); // Task routes
+app.use("/api/v1/coding", codingRoutes); // Coding routes 
 
 
 export default app;

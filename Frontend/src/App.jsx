@@ -10,7 +10,7 @@ import LoginPage from './pages/LoginPage';   // Placeholder
 import SignupPage from './pages/SignupPage'; // Placeholder
 import UserHomePage from './pages/dashboard/UserHomePage'; // Import the new User Home Page component
 import StarsBackground from './components/StarsBackground'; // Import the StarsBackground component
-
+import TaskPage from './pages/TaskPage';
 function App() {
   const location = useLocation();
 
@@ -30,6 +30,7 @@ function App() {
 
         {/* New Route for User Home Page */}
         <Route path="/dashboard" element={<UserHomePage />} /> {/* You can change '/dashboard' to any path you prefer, e.g., '/userhome' */}
+        <Route path="/tasks" element={<TaskPage />} /> {/* You can change '/dashboard' to any path you prefer, e.g., '/userhome' */}
 
         {/* You can add a 404 Not Found route here later if needed */}
         {/* <Route path="*" element={<div>404 Not Found</div>} /> */}
