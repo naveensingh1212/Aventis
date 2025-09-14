@@ -7,8 +7,6 @@ const router = Router();
 
 router.route("/leetcode-potd").get(getLeetCodePotd);
 
-
-
 router.route("/codeforces-potd").get(getCodeforcesPotd);
 
 
