@@ -175,11 +175,27 @@ const getCurrentUser = asyncHandler(async(req, res) => {
     ))
 })
 
+//getallUsers --------->
+const allUsers = asyncHandler(async(req , res)=> {
+    const keyword = req.query.search
+    ?{
+$or: [
+    {username : {$regex : req.query.search , $options : "i"}},
+    {fullname : {$regex : req.query.search , $options : "i"}},
+    ]
+    }:{};   
+
+    const users = await User.find(keyword).find({_id : {$ne : req.user._id}}).select("-password -refreshToken").limit(10)
+
+    return res.status(200).json(new ApiResponse(200 , users , "Users fetched successfully"))
+})
+
 export {
   registerUser,
   loginUser,
   logoutUser,
   refreshAccessToken,
   getCurrentUser,
+    allUsers,
 };
 
