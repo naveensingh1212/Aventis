@@ -1,63 +1,85 @@
-# **Aventis**
+# 🚀 Aventis
 
-## 🧩 Overview
-**Aventis** is a full-stack productivity web application designed for developers and students preparing for coding interviews and competitive programming. It provides a unified dashboard to **track coding progress**, **manage daily tasks**, **view contests and problems**, and **monitor time spent** on key platforms. The platform is engaging, customizable, and built with scalability and future monetization in mind.
+Aventis is a full-stack productivity and competitive programming companion built for developers, students, and coding enthusiasts.  
+It combines **contest tracking**, **daily challenges**, **task management**, and **progress analytics** into a single, sleek dashboard — so you can focus on growing your skills without juggling multiple platforms.
 
 ---
 
-## 🚀 Features
+## 📌 Current Features
 
-- 🧠 **Problem of the Day**  
-  Get the latest problems from LeetCode, Codeforces, CodeChef, and GeeksforGeeks in one place.
+### 🧠 Problem of the Day
+- Aggregates daily coding problems from:
+  - **LeetCode**
+  - **Codeforces**
+  - **CodeChef**
+  - **GeeksforGeeks** (Coming soon)
+- Centralizes them into one view to save time hopping between websites.
 
-- 🏁 **Contest Reminders**  
-  See upcoming contests with platform names, timings, and registration links, similar to Daycode.
+### 🏁 Contest Tracker
+- Shows **upcoming contests** with:
+  - Platform tags
+  - Start time countdowns
+  - Number of registered participants
+- Clickable links to view contest details and register.
 
-- ✅ **Task Management**  
-  Create, update, and check off your coding or daily goals.
+### ✅ Task Management
+- Add, update, and mark tasks as completed.
+- Helps plan your coding goals or daily activities.
 
-- ⏱️ **Time Tracker**  
-  Estimate or accumulate time spent on:
-  - Visual Studio Code
+### ⏱ Coding Time Tracker *(Coming Soon)*
+- Tracks time spent on:
+  - VS Code
   - LeetCode
   - Codeforces
   - GitHub
-  - Custom tasks within the app
+  - Custom tracked activities
 
-- 🔥 **Streaks and Badges**  
-  Earn badges and maintain streaks based on coding activity, task completion, and consistency.
+### 🔥 Streaks & Badges
+- Earn badges for:
+  - Consecutive daily problem solving
+  - Completing tasks
+  - Maintaining activity streaks
+- Gamifies the learning process to keep you motivated.
 
-- 🎯 **Progress Analytics**  
-  Visual dashboard showing daily, weekly, and platform-based coding progress.
+### 📊 Progress Analytics
+- Displays:
+  - Daily progress charts
+  - Weekly trends
+  - Platform-specific stats
+- Built using **Chart.js** or **Recharts** for clean visuals.
 
-- 🌙 **Dark/Light Mode**  
-  Toggle between light and dark themes for better user experience.
+### 🌙 Dark/Light Mode
+- Toggle between light and dark themes for a comfortable coding experience.
 
-- 👥 **User Count Display**  
-  Show total users using the platform as social proof and motivation.
+### 👥 Live User Count
+- Shows how many users are currently using Aventis as motivation and social proof.
 
-- 🧪 **Entertainment (Coming Soon)**  
-  Casual games like Flappy Bird and more in a dedicated entertainment zone.
-
----
-
-## 🛠️ Tech Stack
-
-- **Frontend**: React, Vite, Tailwind CSS
-- **Backend**: Node.js, Express.js, JWT Authentication
-- **Database**: MongoDB (Mongoose ODM)
-- **Real-Time Features**: Socket.io (for chat or live updates)
-- **UI/UX Tools**: Chart.js or Recharts for analytics, Framer Motion for transitions
+### 🎮 Entertainment Hub *(Coming Soon)*
+- Fun mini-games (like Flappy Bird) for small breaks without leaving the app.
 
 ---
 
-## 💡 Vision 
+## 🛠 Tech Stack
 
-Aventis aims to become a personal productivity hub for developers. Future versions may include:
+- **Frontend:** React + Vite, Tailwind CSS, Framer Motion
+- **Backend:** Node.js, Express.js, JWT authentication
+- **Database:** MongoDB with Mongoose
+- **Real-time:** Socket.io for live updates (chat, notifications)
+- **Charts:** Chart.js / Recharts
+
+---
+
+## 🧭 Planned Features
 - Premium productivity analytics
-- Gamified leaderboards
-- Pro badges and achievements
+- Gamified leaderboards for coding activity
+- Pro badges & advanced streak rewards
 - Career coaching integrations
+- AI-based problem recommendations
+- Community challenges & group contests
 
 ---
 
+## 💡 Vision
+Aventis aims to become the go-to **personal coding hub** — combining learning, practice, progress tracking, and community in one platform.
+
+---
