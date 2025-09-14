@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.routes.js";
 import taskRoutes from "./routes/task.routes.js";
 import codingRoutes from "./routes/coding.routes.js";
 import contestRoutes from "./routes/contest.routes.js";
+import chatRoutes from "./routes/chat.routes.js";
 import cors from "cors";
 
 const app = express();
@@ -24,5 +25,6 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/tasks", taskRoutes);
 app.use("/api/v1/coding", codingRoutes);
 app.use("/api/v1/contests", contestRoutes);
+app.use("/api/v1/chat", chatRoutes);
 
 export default app;
