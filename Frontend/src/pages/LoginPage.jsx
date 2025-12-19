@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Loader2 } from 'lucide-react'; // Added Loader2 for loading state without Spinner
+import { Mail, Lock, Loader2, User } from 'lucide-react'; // Added User icon for guest login
 import axios from 'axios';
 
 export default function Login() {
@@ -11,32 +11,29 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e, guest = false) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
       const res = await axios.post(
-        '/api/v1/auth/login', // <--- CORRECTED THIS URL to match your backend routing
-        {
-          username: identifier,
-          email: identifier,
-          password
-        },
+        '/api/v1/auth/login',
+        guest
+          ? { username: 'guest', email: 'guest@example.com', password: 'guest123' } // Guest credentials
+          : { username: identifier, email: identifier, password },
         { withCredentials: true }
       );
 
-      const { accessToken, refreshToken } = res.data.data; // Destructure directly from res.data.data
+      const { accessToken, refreshToken } = res.data.data;
 
       if (accessToken) {
-        localStorage.setItem('accessToken', accessToken); // Save accessToken to localStorage
+        localStorage.setItem('accessToken', accessToken);
         console.log('Login successful! Access token stored in localStorage.');
-        navigate('/dashboard'); // Navigate to dashboard after successful login
+        navigate('/dashboard');
       } else {
         throw new Error('Access token not received in response data.');
       }
-
     } catch (err) {
       console.error('Login error:', err.response?.data?.message || err.message);
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
@@ -62,7 +59,7 @@ export default function Login() {
           Log in to continue your interstellar journey.
         </p>
 
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={(e) => handleLogin(e)} className="space-y-6">
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
@@ -99,7 +96,7 @@ export default function Login() {
           >
             {loading ? (
               <>
-                <Loader2 className="animate-spin w-6 h-6 mr-3" /> {/* Using Lucide's Loader2 */}
+                <Loader2 className="animate-spin w-6 h-6 mr-3" />
                 Logging in...
               </>
             ) : (
@@ -107,6 +104,16 @@ export default function Login() {
             )}
           </button>
         </form>
+
+        {/* Guest Login Button */}
+        <button
+          onClick={(e) => handleLogin(e, true)}
+          disabled={loading}
+          className="mt-4 w-full px-6 py-3 rounded-lg font-semibold text-lg flex items-center justify-center gap-2 transition-all duration-300 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-blue-600 hover:to-cyan-600 shadow-lg"
+        >
+          <User size={20} />
+          {loading ? 'Please wait...' : 'Login as Guest'}
+        </button>
 
         <p className="mt-6 text-center text-gray-400">
           Don’t have an account?{' '}
