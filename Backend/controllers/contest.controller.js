@@ -134,4 +134,4 @@ const getCodeChefContests = asyncHandler(async (req, res) => {
   }
 });
 
-export { getCodeforcesContests, getLeetCodeContests, getCodeChefContests };s
+export { getCodeforcesContests, getLeetCodeContests, getCodeChefContests };
