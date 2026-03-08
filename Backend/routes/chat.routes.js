@@ -1,22 +1,25 @@
 import express from "express";
 import { verifyJWT } from "../middleware/auth.middleware.js";
-const router = express.Router();
-
-import{
+import {
     accessChat,
     fetchChats,
+    deleteChat,
     createGroupChat,
     renameGroup,
     removeFromGroup,
     addToGroup,
+    searchUsers,
 } from "../controllers/chat.controller.js";
 
+const router = express.Router();
 
-router.post("/",verifyJWT, accessChat);
- router.get("/fetchchat",verifyJWT, fetchChats);
- router.put("/rename",verifyJWT, renameGroup);
- router.put("/groupremove",verifyJWT, removeFromGroup);
- router.put("/groupadd",verifyJWT, addToGroup);
- router.post("/group",verifyJWT, createGroupChat); 
+router.get("/search",      verifyJWT, searchUsers);
+router.post("/",           verifyJWT, accessChat);
+router.get("/fetchchat",   verifyJWT, fetchChats);
+router.delete("/:chatId",  verifyJWT, deleteChat);      // ← NEW
+router.post("/group",      verifyJWT, createGroupChat);
+router.put("/rename",      verifyJWT, renameGroup);
+router.put("/groupadd",    verifyJWT, addToGroup);
+router.put("/groupremove", verifyJWT, removeFromGroup);
 
 export default router;

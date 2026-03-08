@@ -1,40 +1,54 @@
-// src/App.jsx
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 
+import LandingPage   from './pages/LandingPage';
+import LoginPage     from './pages/LoginPage';
+import SignupPage    from './pages/SignupPage';
+import UserHomePage  from './pages/dashboard/UserHomePage';
+import StarsBackground from './components/StarsBackground';
+import TaskPage      from './pages/TaskPage';
+import ChatPage      from './pages/ChatPage';
+import Sidebar       from './components/Sidebar';
+import ContestPage   from './pages/ContestPage';
+import CodingPage    from './pages/CodingPage';
+import GamingPage    from './pages/GamingPage';
 
-// Import your page components
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';   // Placeholder
-import SignupPage from './pages/SignupPage'; // Placeholder
-import UserHomePage from './pages/dashboard/UserHomePage'; // Import the new User Home Page component
-import StarsBackground from './components/StarsBackground'; // Import the StarsBackground component
-import TaskPage from './pages/TaskPage';
+// ✅ ChatSidebar is NOT imported — ChatPage has its own list panel built in
+
+const AUTH_ROUTES = ['/', '/login', '/signup'];
+
 function App() {
   const location = useLocation();
+  const isAuthPage = AUTH_ROUTES.includes(location.pathname);
+  const isChatPage = location.pathname === '/chat';
 
   return (
     <>
-      {/* StarsBackground will cover the entire screen behind content */}
-      {/* CRITICAL: Place it here, outside of Routes, to act as a global background */}
       <StarsBackground />
 
-      <Routes  key={location.pathname}>
-        {/* Route for your Landing Page */}
-        <Route path="/" element={<LandingPage />} />
+      {isAuthPage ? (
+        <Routes key={location.pathname}>
+          <Route path="/"       element={<LandingPage />} />
+          <Route path="/login"  element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+        </Routes>
+      ) : (
+        <div className="flex h-screen overflow-hidden">
+          {/* ✅ No sidebar at all on /chat — ChatPage has its own panel */}
+          {!isChatPage && <Sidebar />}
 
-        {/* Placeholder Routes for Login and Signup */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-
-        {/* New Route for User Home Page */}
-        <Route path="/dashboard" element={<UserHomePage />} /> {/* You can change '/dashboard' to any path you prefer, e.g., '/userhome' */}
-        <Route path="/tasks" element={<TaskPage />} /> {/* You can change '/dashboard' to any path you prefer, e.g., '/userhome' */}
-
-        {/* You can add a 404 Not Found route here later if needed */}
-        {/* <Route path="*" element={<div>404 Not Found</div>} /> */}
-      </Routes>
+          <main className="flex-1 min-w-0 overflow-y-auto">
+            <Routes key={location.pathname}>
+              <Route path="/dashboard" element={<UserHomePage />} />
+              <Route path="/tasks"     element={<TaskPage />} />
+              <Route path="/chat"      element={<ChatPage />} />
+              <Route path="/contests"  element={<ContestPage />} />
+              <Route path="/coding"    element={<CodingPage />} />
+              <Route path="/gaming"    element={<GamingPage />} />
+            </Routes>
+          </main>
+        </div>
+      )}
     </>
   );
 }

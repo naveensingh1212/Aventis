@@ -1,37 +1,33 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose from "mongoose";
 
-const chatModelSchema = new Schema({
-    chatName: { 
-        type: String, 
-        required: true, 
+const chatSchema = new mongoose.Schema(
+  {
+    chatName: {
+      type: String,
+      trim: true,
+      required: true,
     },
-    isGrouptChat:{
-        type: Boolean,  
-        default: false,
+    // FIX: was "isGrouptChat" (typo) in original — corrected to "isGroupChat"
+    isGroupChat: {
+      type: Boolean,
+      default: false,
     },
     users: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref : "User", // Assuming your User model is named 'User'
-            required: true
-        },
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
     ],
-    latestMessage: 
-        {
-            type :mongoose.Schema.Types.ObjectId,
-            ref: "Message", // Assuming your Message model is named 'Message'
-        },
-        groupAdmin:{
-            type:mongoose.Schema.Types.ObjectId,
-            ref : "User"
-        },
-    
-
-
-},
-    {
-        timestamps: true // Adds createdAt and updatedAt fields
-    }
+    latestMessage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+    },
+    groupAdmin: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  },
+  { timestamps: true }
 );
 
-export const Chat = mongoose.model("Chat",chatModelSchema); 
+export const Chat = mongoose.model("Chat", chatSchema);
