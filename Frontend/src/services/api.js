@@ -68,5 +68,5 @@ export const contestAPI = {
   getLeetCodeContests: () => api.get('/contests/leetcode'),
   getCodeChefContests: () => api.get('/contests/codechef'),
 };
-
+console.log("ENV:", import.meta.env.VITE_SERVER_URL);
 export default api;
