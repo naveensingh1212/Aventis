@@ -1,7 +1,7 @@
 # 🚀 Aventis
 
 Aventis is a full-stack productivity and competitive programming companion built for developers, students, and coding enthusiasts.  
-It combines **contest tracking**, **daily challenges**, **task management**, and **progress analytics** into a single, sleek dashboard — so you can focus on growing your skills without juggling multiple platforms.
+It combines **contest tracking**, **daily challenges**, **task management**, and **Real time Chat** into a single, sleek dashboard — so you can focus on growing your skills without juggling multiple platforms.
 
 ---
 
@@ -26,6 +26,9 @@ It combines **contest tracking**, **daily challenges**, **task management**, and
 - Add, update, and mark tasks as completed.
 - Helps plan your coding goals or daily activities.
 
+### Real time chat feature
+
+
 ### ⏱ Coding Time Tracker *(Coming Soon)*
 - Tracks time spent on:
   - VS Code
@@ -34,12 +37,6 @@ It combines **contest tracking**, **daily challenges**, **task management**, and
   - GitHub
   - Custom tracked activities
 
-### 🔥 Streaks & Badges
-- Earn badges for:
-  - Consecutive daily problem solving
-  - Completing tasks
-  - Maintaining activity streaks
-- Gamifies the learning process to keep you motivated.
 
 ### 📊 Progress Analytics
 - Displays:
@@ -48,11 +45,8 @@ It combines **contest tracking**, **daily challenges**, **task management**, and
   - Platform-specific stats
 - Built using **Chart.js** or **Recharts** for clean visuals.
 
-### 🌙 Dark/Light Mode
-- Toggle between light and dark themes for a comfortable coding experience.
 
-### 👥 Live User Count
-- Shows how many users are currently using Aventis as motivation and social proof.
+
 
 ### 🎮 Entertainment Hub *(Coming Soon)*
 - Fun mini-games (like Flappy Bird) for small breaks without leaving the app.
@@ -65,7 +59,6 @@ It combines **contest tracking**, **daily challenges**, **task management**, and
 - **Backend:** Node.js, Express.js, JWT authentication
 - **Database:** MongoDB with Mongoose
 - **Real-time:** Socket.io for live updates (chat, notifications)
-- **Charts:** Chart.js / Recharts
 
 ---
 
