@@ -1,7 +1,12 @@
 import axios from 'axios';
 
-// const API_BASE_URL = (import.meta.env.VITE_SERVER_URL || 'http://localhost:8000') + '/api/v1';
-const API_BASE_URL = import.meta.env.VITE_SERVER_URL + '/api/v1';
+// Example of a safer check
+// This ensures we use the Render URL you just put in the .env file
+const base = import.meta.env.VITE_SERVER_URL || 'http://localhost:8000';
+const API_BASE_URL = `${base}/api/v1`;
+
+console.log("Connecting to Backend at:", API_BASE_URL); // This will help us confirm it's fixed!
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
