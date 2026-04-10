@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Check, Clock, Calendar, XCircle, Loader2, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+// ✅ IMPORT YOUR CUSTOM API
+import { taskAPI } from '../services/api'; 
 
 const IconButton = ({ icon: Icon, onClick, className = '', label = '', ...props }) => (
   <motion.button
@@ -28,30 +30,30 @@ const TaskItemCard = ({ task, toggleCompletion, getPriorityColor, handleDeleteCl
       backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-5
       hover:bg-white/10 transition-all duration-300 hover:scale-[1.02]
       hover:shadow-xl hover:shadow-slate-900/20 border-l-4 ${getPriorityColor(task.priority)}
-      ${task.completed ? 'opacity-60' : ''}
+      ${task.status === 'completed' ? 'opacity-60' : ''}
     `}
   >
     <div className="flex items-start space-x-4">
       <button
-        onClick={() => toggleCompletion(task._id, task.completed)}
+        onClick={() => toggleCompletion(task._id, task.status)}
         className={`mt-1 w-6 h-6 rounded-lg border-2 flex items-center justify-center
                     transition-all duration-300 hover:scale-110 ${
-                      task.completed
+                      task.status === 'completed'
                         ? 'bg-emerald-500/80 border-emerald-400 text-white'
                         : 'border-slate-400/60 hover:border-indigo-400/80 hover:bg-indigo-500/20'
                     }`}
       >
-        {task.completed && <Check className="w-4 h-4" />}
+        {task.status === 'completed' && <Check className="w-4 h-4" />}
       </button>
 
       <div className="flex-1 min-w-0">
         <h3 className={`text-lg font-medium mb-2 transition-all duration-300 ${
-          task.completed ? 'text-slate-400 line-through' : 'text-white'
+          task.status === 'completed' ? 'text-slate-400 line-through' : 'text-white'
         }`}>
           {task.title}
         </h3>
         <p className={`text-sm mb-3 transition-all duration-300 ${
-          task.completed ? 'text-slate-500' : 'text-slate-300'
+          task.status === 'completed' ? 'text-slate-500' : 'text-slate-300'
         }`}>
           {task.description}
         </p>
@@ -85,7 +87,6 @@ const TaskPage = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [token, setToken] = useState(null);
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDescription, setNewTaskDescription] = useState('');
@@ -96,130 +97,93 @@ const TaskPage = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem('accessToken');
-    if (storedToken) {
-      setToken(storedToken);
-    } else {
-      navigate('/');
-    }
-  }, [navigate]);
-
+  // ✅ 1. FETCH TASKS (Using taskAPI)
   useEffect(() => {
     const fetchTasks = async () => {
-      if (!token) { setLoading(false); return; }
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch('/api/v1/tasks', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!response.ok) {
-          const errorData = await response.json();
-          if (response.status === 401 || response.status === 403) {
-            localStorage.removeItem('accessToken');
-            navigate('/');
-            return;
-          }
-          throw new Error(errorData.message || 'Failed to fetch tasks');
-        }
-        const result = await response.json();
-        setTasks(result.data.docs || []);
+        const response = await taskAPI.getAllTasks();
+        // Backend returns { success: true, data: { docs: [...] } }
+        setTasks(response.data.data?.docs || response.data.data || []);
       } catch (err) {
-        setError(err.message);
+        if (err.response?.status === 401) navigate('/');
+        setError(err.response?.data?.message || 'Failed to fetch tasks');
       } finally {
         setLoading(false);
       }
     };
     fetchTasks();
-  }, [token, navigate]);
+  }, [navigate]);
 
-  const toggleTaskCompletion = async (taskId, currentCompletedStatus) => {
-    if (!token) { navigate('/'); return; }
-    const newStatus = currentCompletedStatus ? 'pending' : 'completed';
+  // ✅ 2. TOGGLE COMPLETION (Using taskAPI)
+  const toggleTaskCompletion = async (taskId, currentStatus) => {
+    const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
+    
+    // Optimistic Update
     setTasks(prev => prev.map(t =>
-      t._id === taskId ? { ...t, completed: !currentCompletedStatus, status: newStatus } : t
+      t._id === taskId ? { ...t, status: newStatus } : t
     ));
+
     try {
-      const response = await fetch(`/api/v1/tasks/${taskId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ status: newStatus })
-      });
-      if (!response.ok) {
-        if (response.status === 401 || response.status === 403) { localStorage.removeItem('accessToken'); navigate('/'); return; }
-        throw new Error('Failed to update task status');
-      }
+      await taskAPI.updateTask(taskId, { status: newStatus });
     } catch (err) {
-      setError(err.message);
+      setError('Failed to update task status');
+      // Rollback on error
       setTasks(prev => prev.map(t =>
-        t._id === taskId ? { ...t, completed: currentCompletedStatus, status: currentCompletedStatus ? 'completed' : 'pending' } : t
+        t._id === taskId ? { ...t, status: currentStatus } : t
       ));
     }
   };
 
+  // ✅ 3. CREATE TASK (Using taskAPI)
   const handleNewTaskSubmit = async (e) => {
     e.preventDefault();
-    if (!newTaskTitle.trim() || newTaskTitle.trim().length < 3) {
+    if (newTaskTitle.trim().length < 3) {
       setError('Task title must be at least 3 characters long.');
       return;
     }
-    if (!token) { navigate('/'); return; }
+
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/v1/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({
-          title: newTaskTitle,
-          description: newTaskDescription,
-          priority: newTaskPriority,
-          dueDate: newTaskDueDate || undefined,
-          status: 'pending'
-        })
+      const response = await taskAPI.createTask({
+        title: newTaskTitle,
+        description: newTaskDescription,
+        priority: newTaskPriority,
+        dueDate: newTaskDueDate || undefined,
+        status: 'pending'
       });
-      if (!response.ok) {
-        if (response.status === 401 || response.status === 403) { localStorage.removeItem('accessToken'); navigate('/'); return; }
-        throw new Error('Failed to add task');
-      }
-      const result = await response.json();
-      setTasks(prev => [...prev, result.data]);
+      
+      setTasks(prev => [...prev, response.data.data]);
       setShowAddTaskModal(false);
       setNewTaskTitle('');
       setNewTaskDescription('');
       setNewTaskPriority('low');
       setNewTaskDueDate('');
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || 'Failed to add task');
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ 4. DELETE TASK (Using taskAPI)
   const handleDeleteClick = (taskId) => {
     setTaskToDeleteId(taskId);
     setShowConfirmModal(true);
   };
 
   const confirmDeleteTask = async () => {
-    if (!token || !taskToDeleteId) { setShowConfirmModal(false); navigate('/'); return; }
+    if (!taskToDeleteId) return;
     setLoading(true);
-    setError(null);
     setShowConfirmModal(false);
     try {
-      const response = await fetch(`/api/v1/tasks/${taskToDeleteId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!response.ok) {
-        if (response.status === 401 || response.status === 403) { localStorage.removeItem('accessToken'); navigate('/'); return; }
-        throw new Error('Failed to delete task');
-      }
+      await taskAPI.deleteTask(taskToDeleteId);
       setTasks(prev => prev.filter(t => t._id !== taskToDeleteId));
       setTaskToDeleteId(null);
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || 'Failed to delete task');
     } finally {
       setLoading(false);
     }
@@ -243,15 +207,10 @@ const TaskPage = () => {
     .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
 
   return (
-    // ✅ REMOVED ml-56 — sidebar is now in the flex flow via App.jsx
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 relative overflow-hidden">
-      {/* Background Elements */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-900/40 to-slate-900"></div>
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl"></div>
-
+      
       <div className="relative z-10 container mx-auto px-6 py-8 max-w-6xl">
-
         {/* Header */}
         <div className="mb-12">
           <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl">
@@ -273,126 +232,58 @@ const TaskPage = () => {
           </div>
         </div>
 
-        {/* Loading / Error */}
-        {loading && (
-          <div className="flex items-center justify-center text-white text-xl p-8">
-            <Loader2 className="animate-spin mr-3" size={24} /> Loading tasks...
-          </div>
-        )}
-        {error && (
-          <div className="bg-red-600/20 text-red-300 p-4 rounded-lg flex items-center justify-center space-x-2 mb-6">
-            <XCircle size={20} /><span>Error: {error}</span>
-          </div>
-        )}
+        {/* Status Messaging */}
+        {loading && <div className="flex items-center justify-center text-white p-8"><Loader2 className="animate-spin mr-3" /> Syncing...</div>}
+        {error && <div className="bg-red-600/20 text-red-300 p-4 rounded-lg flex items-center justify-center mb-6"><XCircle className="mr-2" /> {error}</div>}
 
-        {/* Task columns */}
-        <AnimatePresence>
-          {token && !loading && !error && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-              {/* Current Tasks */}
-              <div className="space-y-6">
-                <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl">
-                  <div className="flex items-center mb-6">
-                    <Clock className="w-6 h-6 text-indigo-400 mr-3" />
-                    <h2 className="text-2xl font-light text-white tracking-wide">Current Tasks</h2>
-                    <div className="ml-auto bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full text-sm font-medium">
-                      {currentTasks.length} active
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    {currentTasks.length > 0 ? currentTasks.map(task => (
-                      <TaskItemCard key={task._id} task={task} toggleCompletion={toggleTaskCompletion} getPriorityColor={getPriorityColor} handleDeleteClick={handleDeleteClick} />
-                    )) : (
-                      <p className="text-slate-400 text-center py-4">No current tasks. Time to add some!</p>
-                    )}
-                  </div>
+        {/* Task Columns */}
+        {!loading && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6">
+                <div className="flex items-center mb-6">
+                  <Clock className="w-6 h-6 text-indigo-400 mr-3" />
+                  <h2 className="text-2xl font-light text-white">Current</h2>
                 </div>
-              </div>
-
-              {/* Upcoming Tasks */}
-              <div className="space-y-6">
-                <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl">
-                  <div className="flex items-center mb-6">
-                    <Calendar className="w-6 h-6 text-violet-400 mr-3" />
-                    <h2 className="text-2xl font-light text-white tracking-wide">Upcoming Tasks</h2>
-                    <div className="ml-auto bg-violet-500/20 text-violet-300 px-3 py-1 rounded-full text-sm font-medium">
-                      {upcomingTasks.length} scheduled
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    {upcomingTasks.length > 0 ? upcomingTasks.map(task => (
-                      <TaskItemCard key={task._id} task={task} toggleCompletion={toggleTaskCompletion} getPriorityColor={getPriorityColor} handleDeleteClick={handleDeleteClick} />
-                    )) : (
-                      <p className="text-slate-400 text-center py-4">No upcoming tasks. Enjoy the break!</p>
-                    )}
-                  </div>
+                <div className="space-y-4">
+                  {currentTasks.map(task => <TaskItemCard key={task._id} task={task} toggleCompletion={toggleTaskCompletion} getPriorityColor={getPriorityColor} handleDeleteClick={handleDeleteClick} />)}
                 </div>
               </div>
             </div>
-          )}
-        </AnimatePresence>
 
-        {/* Quick Stats */}
-        {token && !loading && !error && (
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
-              <div className="text-3xl font-light text-emerald-400 mb-2">{tasks.filter(t => t.status === 'completed').length}</div>
-              <div className="text-slate-300 font-medium">Completed Total</div>
-            </div>
-            <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
-              <div className="text-3xl font-light text-indigo-400 mb-2">{tasks.filter(t => t.status === 'pending').length}</div>
-              <div className="text-slate-300 font-medium">In Progress</div>
-            </div>
-            <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
-              <div className="text-3xl font-light text-violet-400 mb-2">{tasks.length}</div>
-              <div className="text-slate-300 font-medium">Total Tasks</div>
+            <div className="space-y-6">
+              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6">
+                <div className="flex items-center mb-6">
+                  <Calendar className="w-6 h-6 text-violet-400 mr-3" />
+                  <h2 className="text-2xl font-light text-white">Upcoming</h2>
+                </div>
+                <div className="space-y-4">
+                  {upcomingTasks.map(task => <TaskItemCard key={task._id} task={task} toggleCompletion={toggleTaskCompletion} getPriorityColor={getPriorityColor} handleDeleteClick={handleDeleteClick} />)}
+                </div>
+              </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Add Task Modal */}
+      {/* Add Modal */}
       <AnimatePresence>
         {showAddTaskModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              className="backdrop-blur-xl bg-slate-800/60 border border-slate-700/50 rounded-2xl p-8 shadow-2xl w-full max-w-md">
-              <h2 className="text-2xl font-light text-white mb-6">Add New Task</h2>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="bg-slate-800 border border-slate-700 rounded-2xl p-8 w-full max-w-md">
+              <h2 className="text-2xl text-white mb-6">New Task</h2>
               <form onSubmit={handleNewTaskSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-slate-300 text-sm font-medium mb-1">Title</label>
-                  <input type="text" value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)}
-                    className="w-full p-3 rounded-lg bg-slate-700/50 border border-slate-600/50 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
-                </div>
-                <div>
-                  <label className="block text-slate-300 text-sm font-medium mb-1">Description (Optional)</label>
-                  <textarea value={newTaskDescription} onChange={(e) => setNewTaskDescription(e.target.value)}
-                    className="w-full p-3 rounded-lg bg-slate-700/50 border border-slate-600/50 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" rows="3" />
-                </div>
-                <div>
-                  <label className="block text-slate-300 text-sm font-medium mb-1">Priority</label>
-                  <select value={newTaskPriority} onChange={(e) => setNewTaskPriority(e.target.value)}
-                    className="w-full p-3 rounded-lg bg-slate-700/50 border border-slate-600/50 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-slate-300 text-sm font-medium mb-1">Due Date (Optional)</label>
-                  <input type="date" value={newTaskDueDate} onChange={(e) => setNewTaskDueDate(e.target.value)}
-                    className="w-full p-3 rounded-lg bg-slate-700/50 border border-slate-600/50 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                </div>
-                <div className="flex justify-end space-x-4 mt-6">
-                  <button type="button" onClick={() => setShowAddTaskModal(false)}
-                    className="px-5 py-2 rounded-lg text-slate-300 border border-slate-600/50 hover:bg-slate-700/50 transition-colors">Cancel</button>
-                  <button type="submit"
-                    className="bg-gradient-to-r from-indigo-500/80 to-violet-500/80 hover:from-indigo-500 hover:to-violet-500 text-white px-5 py-2 rounded-lg transition-all duration-300 hover:scale-105">
-                    Add Task
-                  </button>
+                <input type="text" placeholder="Title" value={newTaskTitle} onChange={e => setNewTaskTitle(e.target.value)} className="w-full p-3 bg-slate-700 rounded-lg text-white" required />
+                <textarea placeholder="Description" value={newTaskDescription} onChange={e => setNewTaskDescription(e.target.value)} className="w-full p-3 bg-slate-700 rounded-lg text-white" />
+                <select value={newTaskPriority} onChange={e => setNewTaskPriority(e.target.value)} className="w-full p-3 bg-slate-700 rounded-lg text-white">
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+                <input type="date" value={newTaskDueDate} onChange={e => setNewTaskDueDate(e.target.value)} className="w-full p-3 bg-slate-700 rounded-lg text-white" />
+                <div className="flex justify-end gap-4 mt-6">
+                  <button type="button" onClick={() => setShowAddTaskModal(false)} className="text-slate-400">Cancel</button>
+                  <button type="submit" className="bg-indigo-600 px-6 py-2 rounded-lg text-white">Create</button>
                 </div>
               </form>
             </motion.div>
@@ -400,24 +291,18 @@ const TaskPage = () => {
         )}
       </AnimatePresence>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Modal */}
       <AnimatePresence>
         {showConfirmModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              className="backdrop-blur-xl bg-slate-800/60 border border-slate-700/50 rounded-2xl p-8 shadow-2xl w-full max-w-sm text-center">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+            <div className="bg-slate-800 p-8 rounded-2xl max-w-sm text-center">
               <XCircle size={48} className="text-red-500 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-4">Confirm Deletion</h3>
-              <p className="text-slate-300 mb-6">Are you sure you want to delete this task? This action cannot be undone.</p>
-              <div className="flex justify-center space-x-4">
-                <button onClick={() => setShowConfirmModal(false)}
-                  className="px-5 py-2 rounded-lg text-slate-300 border border-slate-600/50 hover:bg-slate-700/50 transition-colors">Cancel</button>
-                <button onClick={confirmDeleteTask}
-                  className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg transition-colors">Delete</button>
+              <h3 className="text-xl text-white mb-4">Delete Task?</h3>
+              <div className="flex gap-4">
+                <button onClick={() => setShowConfirmModal(false)} className="flex-1 bg-slate-700 py-2 rounded-lg text-white">No</button>
+                <button onClick={confirmDeleteTask} className="flex-1 bg-red-600 py-2 rounded-lg text-white">Yes, Delete</button>
               </div>
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -425,4 +310,4 @@ const TaskPage = () => {
   );
 };
 
-export default TaskPage;  
+export default TaskPage;
