@@ -16,21 +16,19 @@ dotenv.config();
 const app = express();
 
 // ── CORS CONFIGURATION ──────────────────────────────────────────────────────
-// This setup allows your Vercel frontend to send Cookies and Authorization headers
 const allowedOrigins = [
-  "http://localhost:5173",                   // Local development
-  "https://aventis-drab.vercel.app",         // Your specific Vercel URL
-  process.env.FRONTEND_URL                   // Dynamic URL from Render Env
-].filter(Boolean);
+  "http://localhost:5173",
+  "https://aventis-drab.vercel.app",
+  "https://aventis-git-main-naveen-singhs-projects-5177f475.vercel.app" // Added the preview URL from your screenshot
+];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or Postman)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
+    // Allow requests with no origin (like mobile apps) or if origin is in our list
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error(`CORS blocked: ${origin}`));
+      callback(new Error('CORS blocked: ' + origin));
     }
   },
   credentials: true,
@@ -44,16 +42,20 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 
 // ── ROUTES ──────────────────────────────────────────────────────────────────
-app.use("/api/v1/auth",     authRoutes);
-app.use("/api/v1/tasks",    taskRoutes);
-app.use("/api/v1/coding",   codingRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/tasks", taskRoutes);
+app.use("/api/v1/coding", codingRoutes);
 app.use("/api/v1/contests", contestRoutes);
-app.use("/api/v1/chat",     chatRoutes);
+app.use("/api/v1/chat", chatRoutes);
 app.use("/api/v1/messages", messageRoutes);
 
-// Optional: Basic Health Check
-app.get("/", (req, res) => {
-  res.send("Aventis API is running...");
+// Health Check
+app.get("/", (req, res) => res.send("Aventis Server is Live"));
+
+// Error Handler to prevent the 500 crash on preflight
+app.use((err, req, res, next) => {
+  console.error("Server Error:", err.message);
+  res.status(500).json({ success: false, message: err.message });
 });
 
 export default app;
