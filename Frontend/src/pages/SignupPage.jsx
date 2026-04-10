@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api'; // FIXED: Importing your custom axios instance
 import Spinner from '../components/Spinner';
 
 export default function Signup() {
@@ -20,18 +20,19 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const res = await axios.post('/api/v1/auth/register', {
-  username,
-  fullname,
-  email,
-  password,
-}, {
-  withCredentials: true
-});
+      // FIXED: Using 'api.post' instead of 'axios.post'
+      // The baseURL in api.js already handles 'https://aventis.onrender.com/api/v1'
+      const res = await api.post('/auth/register', {
+        username,
+        fullname,
+        email,
+        password,
+      });
 
       console.log('Signup successful:', res.data.message || res.data);
       navigate('/login');
     } catch (err) {
+      // Accessing the error message from your backend response
       setError(err.response?.data?.message || 'Signup failed. Please try again.');
     } finally {
       setLoading(false);

@@ -1,41 +1,41 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Loader2, User } from 'lucide-react'; // Added User icon for guest login
-import axios from 'axios';
+import { Mail, Lock, Loader2, User } from 'lucide-react';
+import api from '../services/api'; // FIXED: Use your custom instance
+import Spinner from '../components/Spinner';
 
 export default function Login() {
-  const [identifier, setIdentifier] = useState(''); // can be username or email
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e, guest = false) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        '/api/v1/auth/login',
+      // FIXED: Using 'api.post' and shortened path
+      const res = await api.post(
+        '/auth/login',
         guest
-          ? { username: 'guest', email: 'guest@example.com', password: 'guest123' } // Guest credentials
-          : { username: identifier, email: identifier, password },
-        { withCredentials: true }
+          ? { username: 'guest', email: 'guest@example.com', password: 'guest123' }
+          : { username: identifier, email: identifier, password }
       );
 
-      const { accessToken, refreshToken } = res.data.data;
+      const { accessToken } = res.data.data;
 
       if (accessToken) {
         localStorage.setItem('accessToken', accessToken);
-        console.log('Login successful! Access token stored in localStorage.');
+        console.log('Login successful!');
         navigate('/dashboard');
       } else {
-        throw new Error('Access token not received in response data.');
+        throw new Error('Access token not received.');
       }
     } catch (err) {
-      console.error('Login error:', err.response?.data?.message || err.message);
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
@@ -105,10 +105,10 @@ export default function Login() {
           </button>
         </form>
 
-        {/* Guest Login Button */}
         <button
           onClick={(e) => handleLogin(e, true)}
           disabled={loading}
+          type="button"
           className="mt-4 w-full px-6 py-3 rounded-lg font-semibold text-lg flex items-center justify-center gap-2 transition-all duration-300 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-blue-600 hover:to-cyan-600 shadow-lg"
         >
           <User size={20} />
